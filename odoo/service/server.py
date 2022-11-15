@@ -31,7 +31,10 @@ if os.name == 'posix':
         from inotify.adapters import InotifyTrees
         from inotify.constants import IN_MODIFY, IN_CREATE, IN_MOVED_TO
         INOTIFY_LISTEN_EVENTS = IN_MODIFY | IN_CREATE | IN_MOVED_TO
-    except ImportError:
+
+        # To test if InotifyTrees is working in current OS
+        InotifyTrees([], mask=INOTIFY_LISTEN_EVENTS, block_duration_s=.5)
+    except (ImportError, inotify.calls.InotifyError):
         inotify = None
 else:
     # Windows shim
@@ -43,7 +46,12 @@ if not inotify:
         import watchdog
         from watchdog.observers import Observer
         from watchdog.events import FileCreatedEvent, FileModifiedEvent, FileMovedEvent
-    except ImportError:
+
+        # To test if Observer is working in current OS
+        observer = Observer()
+        observer.schedule(object, '/', recursive=True)
+        observer.start()
+    except (ImportError, OSError):
         watchdog = None
 
 # Optional process names for workers
